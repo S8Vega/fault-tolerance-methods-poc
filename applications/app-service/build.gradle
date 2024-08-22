@@ -1,12 +1,20 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+    // subprojects
     implementation project(':model')
     implementation project(':usecase')
+    implementation project(':rest-consumer')
+
+    // scaffold
     implementation 'org.springframework.boot:spring-boot-starter'
     runtimeOnly('org.springframework.boot:spring-boot-devtools')
     testImplementation 'com.tngtech.archunit:archunit:1.1.1'
     testImplementation 'com.fasterxml.jackson.core:jackson-databind'
+
+    // dependencies
+    testImplementation 'org.springframework:spring-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.register('explodedJar', Copy) {
@@ -23,4 +31,3 @@ bootJar {
     // Sets output jar name
     archiveFileName = "${project.getParent().getName()}.${archiveExtension.get()}"
 }
-
