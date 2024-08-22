@@ -32,20 +32,28 @@ resilience4j:
   circuitbreaker:
     instances:
       testGet:
+        # Activa el indicador de salud para monitoreo
         registerHealthIndicator: true
+        # Abre el circuito si más del 50% de las llamadas fallan
         failureRateThreshold: 50
+        # Abre el circuito si más del 50% de las llamadas son lentas (> 2s)
         slowCallRateThreshold: 50
+        # Define que una llamada lenta es cualquier llamada que tarde más de 2 segundos
         slowCallDurationThreshold: "2s"
+        # En estado medio abierto, permite 3 llamadas de prueba
         permittedNumberOfCallsInHalfOpenState: 3
+        # Utiliza las últimas 10 llamadas para calcular las estadísticas del Circuit Breaker
         slidingWindowSize: 10
+        # Requiere al menos 10 llamadas antes de evaluar la tasa de fallos o lentitud
         minimumNumberOfCalls: 10
+        # Mantiene el circuito abierto por 10 segundos antes de probar de nuevo
         waitDurationInOpenState: "10s"
       findByText:
         registerHealthIndicator: true
         failureRateThreshold: 50
         slowCallRateThreshold: 50
         slowCallDurationThreshold: "2s"
-        permittedNumberOfCallsInHalfOpenState: 3
+        permittedNumberOfCallsInHalfOpenState: 2
         slidingWindowSize: 2
         minimumNumberOfCalls: 2
         waitDurationInOpenState: "100s"
