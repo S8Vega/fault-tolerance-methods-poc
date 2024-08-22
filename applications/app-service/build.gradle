@@ -4,6 +4,7 @@ dependencies {
     // subprojects
     implementation project(':model')
     implementation project(':usecase')
+    implementation project(':api-rest')
     implementation project(':rest-consumer')
 
     // scaffold
