@@ -4,6 +4,7 @@ import co.com.the_chaos_company.model.news.News;
 import co.com.the_chaos_company.model.news.gateways.NewsRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriBuilder;
@@ -12,8 +13,10 @@ import reactor.core.publisher.Mono;
 
 import java.net.URI;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class RestConsumer implements NewsRepository {
@@ -50,13 +53,25 @@ public class RestConsumer implements NewsRepository {
 //                .retrieve()
 //                .bodyToMono(ObjectResponse.class);
 //    }
-    
-    @CircuitBreaker(name = "findByText")
+
+    @CircuitBreaker(name = "findByText", fallbackMethod = "findByTextFallback")
     @Override
     public Flux<News> findByText(String text) {
         return fetchNews(text)
                 .map(ObjectResponse::getArticles)
                 .flatMapIterable(this::convertArticlesToNews);
+    }
+
+    public Flux<News> findByTextFallback(String text, Exception ignored) {
+        log.error("Fallback method called for text: {}", text);
+        log.error("Error: {} {}", ignored.getClass().getName(), ignored.getMessage());
+        return Flux.just(News.builder()
+                .title("Fallback title")
+                .description("Fallback description")
+                .url("Fallback url")
+                .urlToImage("Fallback urlToImage")
+                .publishedAt(LocalDateTime.now())
+                .build());
     }
 
     private Flux<ObjectResponse> fetchNews(String text) {
@@ -70,7 +85,7 @@ public class RestConsumer implements NewsRepository {
     }
 
     private URI buildUri(UriBuilder uriBuilder, String text) {
-        return uriBuilder.path("/v2/everything1")
+        return uriBuilder.path("/v2/everything")
                 .queryParam("language", "es")
                 .queryParam("pageSize", "5")
                 .queryParam("from", LocalDate.now().minusDays(1).toString())
